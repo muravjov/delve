@@ -536,7 +536,9 @@ func gobuild(debugname, pkg string) error {
 	}
 	if ver, _ := goversion.Installed(); ver.Major < 0 || ver.AfterOrEqual(goversion.GoVersion{1, 9, -1, 0, 0, ""}) {
 		// after go1.9 building with -gcflags='-N -l' and -a simultaneously works
-		args = append(args, "-a")
+
+		// :TRICKY: no, it is so slow now, and I want -i to apply -- Muravjov
+		//args = append(args, "-a")
 	}
 	args = append(args, pkg)
 	return gocommand("build", args...)
@@ -549,7 +551,9 @@ func gotestbuild(pkg string) error {
 	}
 	if ver, _ := goversion.Installed(); ver.Major < 0 || ver.AfterOrEqual(goversion.GoVersion{1, 9, -1, 0, 0, ""}) {
 		// after go1.9 building with -gcflags='-N -l' and -a simultaneously works
-		args = append(args, "-a")
+
+		// :TRICKY: no, it is so slow now, and I want -i to apply -- Muravjov
+		//args = append(args, "-a")
 	}
 	args = append(args, pkg)
 	return gocommand("test", args...)

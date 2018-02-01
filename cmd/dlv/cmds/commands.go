@@ -378,12 +378,19 @@ func testCmd(cmd *cobra.Command, args []string) {
 		if len(dlvArgs) > 0 {
 			pkg = args[0]
 		}
-		err := gotestbuild(pkg)
+
+		debugname, err := filepath.Abs("./" + testdebugname)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			return 1
+		}
+
+		err = gotestbuild(debugname, pkg)
 		if err != nil {
 			return 1
 		}
-		defer os.Remove("./" + testdebugname)
-		processArgs := append([]string{"./" + testdebugname}, targetArgs...)
+		defer os.Remove(debugname)
+		processArgs := append([]string{debugname}, targetArgs...)
 
 		return execute(0, processArgs, conf, "", executingGeneratedTest)
 	}()
@@ -544,8 +551,8 @@ func gobuild(debugname, pkg string) error {
 	return gocommand("build", args...)
 }
 
-func gotestbuild(pkg string) error {
-	args := []string{"-gcflags", "-N -l", "-c", "-o", testdebugname}
+func gotestbuild(debugname, pkg string) error {
+	args := []string{"-gcflags", "-N -l", "-c", "-o", debugname}
 	if BuildFlags != "" {
 		args = append(args, config.SplitQuotedFields(BuildFlags, '\'')...)
 	}

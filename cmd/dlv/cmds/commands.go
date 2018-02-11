@@ -3,6 +3,7 @@ package cmds
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -536,10 +537,43 @@ func execute(attachPid int, processArgs []string, conf *config.Config, coreFile 
 	return status
 }
 
+func FindString(arr []string, s string) int {
+	res := -1
+	for i, val := range arr {
+		if val == s {
+			res = i
+			break
+		}
+	}
+	return res
+}
+
+func ParseBuildFlags() []string {
+	res := config.SplitQuotedFields(BuildFlags, '\'')
+
+	for {
+		i := FindString(res, "-gcflags")
+		if i == -1 {
+			break
+		}
+
+		// skip -gflags and its argument, if exists
+		j := i + 2
+		if j > len(res) {
+			j -= 1
+		}
+		log.Printf("Overriding build flags %#v", res[i:j])
+
+		res = append(res[:i], res[j:]...)
+	}
+
+	return res
+}
+
 func gobuild(debugname, pkg string) error {
 	args := []string{"-gcflags", "-N -l", "-o", debugname}
 	if BuildFlags != "" {
-		args = append(args, config.SplitQuotedFields(BuildFlags, '\'')...)
+		args = append(args, ParseBuildFlags()...)
 	}
 	if ver, _ := goversion.Installed(); ver.Major < 0 || ver.AfterOrEqual(goversion.GoVersion{1, 9, -1, 0, 0, ""}) {
 		// after go1.9 building with -gcflags='-N -l' and -a simultaneously works
@@ -554,7 +588,7 @@ func gobuild(debugname, pkg string) error {
 func gotestbuild(debugname, pkg string) error {
 	args := []string{"-gcflags", "-N -l", "-c", "-o", debugname}
 	if BuildFlags != "" {
-		args = append(args, config.SplitQuotedFields(BuildFlags, '\'')...)
+		args = append(args, ParseBuildFlags()...)
 	}
 	if ver, _ := goversion.Installed(); ver.Major < 0 || ver.AfterOrEqual(goversion.GoVersion{1, 9, -1, 0, 0, ""}) {
 		// after go1.9 building with -gcflags='-N -l' and -a simultaneously works

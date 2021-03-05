@@ -662,7 +662,7 @@ func debugCmd(cmd *cobra.Command, args []string) {
 		if !ok {
 			return 1
 		}
-		defer gobuild.Remove(debugname)
+		defer gobuild.RemoveDebuggee(debugname)
 		processArgs := append([]string{debugname}, targetArgs...)
 		return execute(0, processArgs, conf, "", debugger.ExecutingGeneratedFile, dlvArgs, buildFlags)
 	}()
@@ -721,7 +721,7 @@ func traceCmd(cmd *cobra.Command, args []string, conf *config.Config) int {
 					return 1
 				}
 				debugname = debugexe
-				defer gobuild.Remove(debugname)
+				defer gobuild.RemoveDebuggee(debugname)
 			}
 
 			processArgs = append([]string{debugname}, targetArgs...)
@@ -931,7 +931,7 @@ func testCmd(cmd *cobra.Command, args []string) {
 		if !ok {
 			return 1
 		}
-		defer gobuild.Remove(debugname)
+		defer gobuild.RemoveDebuggee(debugname)
 		processArgs := append([]string{debugname}, targetArgs...)
 
 		if workingDir == "" {

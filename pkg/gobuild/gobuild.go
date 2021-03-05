@@ -14,6 +14,18 @@ import (
 	"github.com/go-delve/delve/pkg/logflags"
 )
 
+func RemoveDebuggee(path string) {
+	// Muravjov - do not need to delete debuggee
+	if true {
+		return
+	}
+
+	err := os.Remove(path)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not remove %v: %v\n", path, err)
+	}
+}
+
 // Remove the file at path and issue a warning to stderr if this fails.
 // This can be used to remove the temporary binary generated for the session.
 func Remove(path string) {
@@ -130,5 +142,11 @@ func gocommandExecCmd(command string, args ...string) (string, *exec.Cmd) {
 	allargs = append(allargs, args...)
 	goBuild := exec.Command("go", allargs...)
 	logflags.DebuggerLogger().Debugf("gobuild args: %v", allargs)
+
+	// Muravjov - por esti certa pri muntflagoj
+	if os.Getenv("MY_DELVE_DEBUG") != "" {
+		fmt.Fprintf(os.Stderr, "gocommand: go %q\n", allargs)
+	}
+
 	return strings.Join(append([]string{"go"}, allargs...), " "), goBuild
 }
